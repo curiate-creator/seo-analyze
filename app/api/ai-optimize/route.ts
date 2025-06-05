@@ -4,11 +4,17 @@ import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, targetKeyword, optimizationType } = await request.json()
+    const { text, targetKeyword, optimizationType, email} = await request.json()
 
     if (!text) {
       return NextResponse.json({ error: "Text content is required" }, { status: 400 })
     }
+    
+    if ( email != process.env.ACCEPTED_EMAIL){ 
+      return NextResponse.json({ error: "Invalid email provided" }, { status: 400 })
+
+    }
+    
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
