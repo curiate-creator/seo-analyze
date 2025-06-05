@@ -1,17 +1,16 @@
-export const verifyEmail = async (email: string): Promise<boolean> => {
-  try {
-    const response = await fetch("/api/verify-email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email }),
-    });
+'use server';
 
-    const data = await response.json();
-    return data.isValid;
+export async function verifyEmail(email: string): Promise<boolean> {
+  try {
+    // Get authorized emails from environment variable
+    const authorizedEmails = process.env.AUTHORIZED_EMAILS?.split(',').map(e => e.trim().toLowerCase()) || [];
+    
+    // Check if the provided email is in the authorized list
+    const isAuthorized = authorizedEmails.includes(email.toLowerCase());
+    
+    return isAuthorized;
   } catch (error) {
-    console.error("Email verification error:", error);
+    console.error('Email verification error:', error);
     return false;
   }
-};
+}

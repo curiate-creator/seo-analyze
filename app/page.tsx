@@ -435,98 +435,127 @@ The future of AI looks promising, with continuous advancements in natural langua
     setSelectedKeywords(new Set());
   };
 
+  useEffect(() => {
+  // Check for previously verified email in session storage
+  const storedEmail = sessionStorage.getItem('verifiedEmail');
+  if (storedEmail) {
+    setUserEmail(storedEmail);
+    setIsEmailVerified(true);
+  }
+}, []);
+
+// Update your email verification success handler to store the email
+const handleEmailVerificationSuccess = (email: string) => {
+  setUserEmail(email);
+  setIsEmailVerified(true);
+  sessionStorage.setItem('verifiedEmail', email);
+  setShowEmailModal(false);
+  
+  if (optimizationType) {
+    optimizeContent(optimizationType as OptimizationType);
+  }
+};
+
   // Email Verification Modal Component
-  const EmailVerificationModal = () => {
-    const [email, setEmail] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-    const inputRef = useRef<HTMLInputElement>(null);
+const EmailVerificationModal = () => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-    const handleVerification = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setError("");
-      setIsLoading(true);
+  const handleVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    
+    if (!email.trim()) {
+      setError("Please enter a valid email address");
+      return;
+    }
 
-      try {
-        const response = await verifyEmail(email);
-        if (response) {
-          setUserEmail(email);
-          setIsEmailVerified(true);
-          setShowEmailModal(false);
+    setIsLoading(true);
 
-          if (optimizationType) {
-            optimizeContent(optimizationType as OptimizationType);
-          }
-        } else {
-          setError("This email is not authorized to use AI features");
+    try {
+      const isAuthorized = await verifyEmail(email);
+      
+      if (isAuthorized) {
+        setUserEmail(email);
+        setIsEmailVerified(true);
+        setShowEmailModal(false);
+
+        // Proceed with the AI optimization that was requested
+        if (optimizationType) {
+          optimizeContent(optimizationType as OptimizationType);
         }
-      } catch (error) {
-        setError("Verification failed. Please try again.");
-      } finally {
-        setIsLoading(false);
+      } else {
+        setError("This email is not authorized to use AI features. Please contact support if you believe this is an error.");
       }
-    };
-
-    useEffect(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, []);
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-[#ECDFCC] p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
-          <h3 className="text-lg font-bold text-[#1E201E] mb-4">
-            Verify Email for AI Features
-          </h3>
-          <p className="text-sm text-[#3C3D37] mb-4">
-            Please enter your email address to access AI-powered optimization
-            features.
-          </p>
-          <form onSubmit={handleVerification} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[#1E201E] mb-2">
-                Email Address
-              </label>
-              <input
-                ref={inputRef}
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 border border-[#697565] rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="your@email.com"
-                required
-              />
-              {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-            </div>
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setShowEmailModal(false)}
-                className="px-4 py-2 text-sm bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-md transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center gap-2"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                    Verifying...
-                  </>
-                ) : (
-                  "Verify & Continue"
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
+    } catch (error) {
+      console.error('Verification error:', error);
+      setError("Verification failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-[#ECDFCC] p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+        <h3 className="text-lg font-bold text-[#1E201E] mb-4">
+          Verify Email for AI Features
+        </h3>
+        <p className="text-sm text-[#3C3D37] mb-4">
+          Please enter your authorized email address to access AI-powered optimization features.
+        </p>
+        <form onSubmit={handleVerification} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[#1E201E] mb-2">
+              Email Address
+            </label>
+            <input
+              ref={inputRef}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 border border-[#697565] rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="your@email.com"
+              required
+            />
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setShowEmailModal(false)}
+              className="px-4 py-2 text-sm bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-md transition-colors flex items-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                  Verifying...
+                </>
+              ) : (
+                "Verify & Continue"
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
   const ScoreCircle = ({
     score,
