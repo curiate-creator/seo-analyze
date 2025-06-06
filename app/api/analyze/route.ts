@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// Enhanced types for better type safety
+// defining the types
 interface TextRazorEntity {
   matchedText: string
   type?: string[]
@@ -44,7 +44,7 @@ interface TextRazorResponse {
   sentiment?: TextRazorSentiment
 }
 
-// Enhanced stop words list
+//  list -- took from ai
 const STOP_WORDS = new Set([
   'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'has', 'he',
   'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the', 'to', 'was', 'were',
@@ -410,7 +410,7 @@ export async function POST(request: NextRequest) {
                      (text.match(/<[uo]l[^>]*>/gi) || []).length
     const linkCount = (text.match(/\[.*?\]\(.*?\)/g) || []).length + 
                      (text.match(/<a\s[^>]*>/gi) || []).length
-    const imageCount = (text.match(/!\[.*?\]\(.*?\)/g) || []).length + 
+    const imageCount = (text.match(/!\[.*?  \]\(.*?\)/g) || []).length + 
                       (text.match(/<img\s[^>]*>/gi) || []).length
 
     // Enhanced readability calculation
@@ -484,7 +484,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Compile final results
+    //results
     const result = {
       // Basic metrics
       wordCount,
@@ -493,15 +493,15 @@ export async function POST(request: NextRequest) {
       avgWordsPerSentence: Math.round(avgWordsPerSentence * 10) / 10,
       avgSentencesPerParagraph: Math.round(avgSentencesPerParagraph * 10) / 10,
 
-      // Readability
+      //readability
       readability: readabilityMetrics,
 
-      // Keywords and topics
+      
       keywords: keywords.slice(0, 15),
       keywordDensity,
       targetKeywordAnalysis,
 
-      // Entities and topics from TextRazor
+      
       entities: entities.slice(0, 10).map(entity => ({
         text: entity.matchedText || "Unknown",
         type: entity.dbpediaTypes?.[0] || entity.freebaseTypes?.[0] || entity.type?.[0] || "Unknown",
@@ -522,7 +522,7 @@ export async function POST(request: NextRequest) {
         confidence: Math.round((sentiment.confidence || 0) * 100) / 100
       },
 
-      // Content structure
+      
       contentStructure: {
         hasHeadings: headingCount > 0,
         headingCount,
@@ -566,7 +566,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to generate actionable recommendations
+// function to get recommendations
 function generateRecommendations(
   breakdown: { [key: string]: { score: number; maxScore: number; reason: string } },
   wordCount: number,

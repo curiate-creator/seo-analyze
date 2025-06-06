@@ -85,7 +85,7 @@ The future of AI looks promising, with advancements in natural language processi
 
     setIsAnalyzing(true);
     try {
-      // Simulate API call to your analysis endpoint
+      //  API call endpoint
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -436,7 +436,7 @@ The future of AI looks promising, with continuous advancements in natural langua
   };
 
   useEffect(() => {
-  // Check for previously verified email in session storage
+  //  email in session storage
   const storedEmail = sessionStorage.getItem('verifiedEmail');
   if (storedEmail) {
     setUserEmail(storedEmail);
@@ -444,7 +444,7 @@ The future of AI looks promising, with continuous advancements in natural langua
   }
 }, []);
 
-// Update your email verification success handler to store the email
+// email verification success handler to store the email
 const handleEmailVerificationSuccess = (email: string) => {
   setUserEmail(email);
   setIsEmailVerified(true);
